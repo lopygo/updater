@@ -11,17 +11,23 @@ import (
 func main() {
 	fmt.Println("updater running")
 
-	localVer := localVersion()
+	localVer, err := localVersion()
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("get version of local", localVer)
 
-	latestVer := remoteLatest()
+	latestVer, err := remoteLatest()
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("get latest version from remote", latestVer)
 
 	fmt.Println("set target version, from current")
 	targets := []*semver.Version{}
 
 	fmt.Println("loop")
-	err := compareVersionFromAndTo(&targets, localVer, latestVer)
+	err = compareVersionFromAndTo(&targets, localVer, latestVer)
 	if err != nil {
 		panic(err)
 	}
@@ -38,21 +44,12 @@ func main() {
 
 }
 
-func compareVersionFromAndTo(targets *[]*semver.Version, from, to string) (err error) {
+func compareVersionFromAndTo(targets *[]*semver.Version, fromVersion, toVersion *semver.Version) (err error) {
 	time.Sleep(time.Second)
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()
-	fmt.Println("compare from and to", from, to)
-	fromVersion, err := semver.NewVersion(from)
-	if err != nil {
-		return
-	}
-
-	toVersion, err := semver.NewVersion(to)
-	if err != nil {
-		return
-	}
+	fmt.Println("compare from and to", fromVersion, toVersion)
 
 	if !fromVersion.LessThan(toVersion) {
 		err = fmt.Errorf("local version[%s] less than target[%s] ", fromVersion, toVersion)
@@ -66,7 +63,7 @@ func compareVersionFromAndTo(targets *[]*semver.Version, from, to string) (err e
 	fmt.Println("get constraint info from upgrade scripts")
 
 	versionConstraintMp := versionConstraint()
-	conVer, ok := versionConstraintMp[to]
+	conVer, ok := versionConstraintMp[toVersion.String()]
 	if !ok {
 		return fmt.Errorf("can not get constraint from upgrade scripts")
 	}
@@ -108,7 +105,7 @@ func compareVersionFromAndTo(targets *[]*semver.Version, from, to string) (err e
 
 		// *targets = append(*targets, listChecked[0])
 		// *targets = append([]*semver.Version{listChecked[0]}, *targets...)
-		return compareVersionFromAndTo(targets, from, "v"+listChecked[0].String())
+		return compareVersionFromAndTo(targets, fromVersion, listChecked[0])
 	}
 
 	fmt.Println("obtaining the minimum version that satisfies constraints. set target version")
@@ -133,34 +130,34 @@ func remoteVersions() []string {
 func versionConstraint() map[string]*Info {
 
 	mp := map[string]*Info{
-		"v1.0.0": {
+		"1.0.0": {
 			Constraint: ">= v0.3.2",
 		},
-		"v0.3.3": {
+		"0.3.3": {
 			Constraint: ">= v0.3.0",
 		},
-		"v0.3.2": {
+		"0.3.2": {
 			Constraint: ">= v0.3.0",
 		},
-		"v0.3.1": {
+		"0.3.1": {
 			Constraint: ">= v0.3.0",
 		},
-		"v0.3.0": {
+		"0.3.0": {
 			Constraint: "= v0.2.2",
 		},
-		"v0.2.2": {
+		"0.2.2": {
 			Constraint: ">= v0.2.0",
 		},
-		"v0.2.1": {
+		"0.2.1": {
 			Constraint: ">= v0.2.0",
 		},
-		"v0.2.0": {
+		"0.2.0": {
 			Constraint: "v0.1.3",
 		},
-		"v0.1.3": {
+		"0.1.3": {
 			Constraint: "< v0.1.3",
 		},
-		"v0.1.2": {
+		"0.1.2": {
 			Constraint: "< v0.1.2",
 		},
 	}
@@ -171,12 +168,17 @@ func versionConstraint() map[string]*Info {
 	return mp
 }
 
-func remoteLatest() string {
-	return "v1.0.0"
+func remoteLatest() (vv *semver.Version, err error) {
+
+	v := "v1.0.0"
+	return semver.NewVersion(v)
 }
 
-func localVersion() string {
-	return "v0.2.2"
+func localVersion() (vv *semver.Version, err error) {
+
+	v := "v0.1.2"
+	return semver.NewVersion(v)
+
 }
 
 type Remote struct {
