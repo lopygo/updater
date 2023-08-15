@@ -181,10 +181,6 @@ func localVersion() (vv *semver.Version, err error) {
 
 }
 
-type Remote struct {
-	Versions []string
-}
-
 type Info struct {
 	Current    string `json:"current"`
 	Constraint string `json:"constraint"`
