@@ -36,6 +36,11 @@ func (p *Updater) GenerateUpgrades() (upgrades []IUpgradeScripts, err error) {
 	}
 	log.Println("get latest version from remote", latestVer)
 
+	if !latestVer.GreaterThan(localVer) {
+		err = fmt.Errorf("the local version is already up to date")
+		return
+	}
+
 	log.Println("set target version, from current")
 	upgrades = []IUpgradeScripts{}
 
@@ -60,7 +65,7 @@ func (p *Updater) Exec(upgrades []IUpgradeScripts) error {
 func (p *Updater) compareVersionFromAndTo(targets *[]IUpgradeScripts, fromVersion, toVersion *semver.Version) (err error) {
 
 	if !fromVersion.LessThan(toVersion) {
-		err = fmt.Errorf("local version[%s] less than target[%s] ", fromVersion, toVersion)
+		err = fmt.Errorf("local version[%s] not less than target[%s] ", fromVersion, toVersion)
 		return
 	}
 
