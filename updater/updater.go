@@ -2,8 +2,8 @@ package updater
 
 import (
 	"fmt"
+	"log"
 	"sort"
-	"time"
 
 	"github.com/Masterminds/semver/v3"
 )
@@ -21,34 +21,32 @@ func NewUpdater(local ILocalScripts, remote IRemoteScripts) *Updater {
 	}
 }
 
-func (p *Updater) ResolveList() (targets []IUpgradeScripts, err error) {
-
-	fmt.Println("updater running")
+func (p *Updater) GenerateUpgrades() (upgrades []IUpgradeScripts, err error) {
 
 	localVer, err := p.localScript.LocalCurrentVersion()
 	if err != nil {
 
 		return
 	}
-	fmt.Println("get version of local", localVer)
+	log.Println("get version of local", localVer)
 
 	latestVer, err := p.remoteScript.RemoteLatestVersion()
 	if err != nil {
 		return
 	}
-	fmt.Println("get latest version from remote", latestVer)
+	log.Println("get latest version from remote", latestVer)
 
-	fmt.Println("set target version, from current")
-	targets = []IUpgradeScripts{}
+	log.Println("set target version, from current")
+	upgrades = []IUpgradeScripts{}
 
-	fmt.Println("loop")
-	err = p.compareVersionFromAndTo(&targets, localVer, latestVer)
+	log.Println("loop")
+	err = p.compareVersionFromAndTo(&upgrades, localVer, latestVer)
 
 	return
 }
 
-func (p *Updater) Exec(targets []IUpgradeScripts) error {
-	for _, v := range targets {
+func (p *Updater) Exec(upgrades []IUpgradeScripts) error {
+	for _, v := range upgrades {
 		err := v.UpgradeExec()
 		if err != nil {
 			return err
@@ -60,25 +58,20 @@ func (p *Updater) Exec(targets []IUpgradeScripts) error {
 }
 
 func (p *Updater) compareVersionFromAndTo(targets *[]IUpgradeScripts, fromVersion, toVersion *semver.Version) (err error) {
-	time.Sleep(time.Second)
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println("compare from and to", fromVersion, toVersion)
 
 	if !fromVersion.LessThan(toVersion) {
 		err = fmt.Errorf("local version[%s] less than target[%s] ", fromVersion, toVersion)
 		return
 	}
 
-	fmt.Println("download the version from remote if not exists")
+	log.Println("download the version from remote if not exists")
 	upgradeScripts, err := p.remoteScript.RemoteGetUpgradeScripts(toVersion)
 	if err != nil {
 
 		return
 	}
 
-	fmt.Println("get constraint info from upgrade scripts")
+	log.Println("get constraint info from upgrade scripts")
 	scriptInfo, err := upgradeScripts.UpgradeInfo()
 	if err != nil {
 		return
@@ -99,12 +92,10 @@ func (p *Updater) compareVersionFromAndTo(targets *[]IUpgradeScripts, fromVersio
 	*targets = append([]IUpgradeScripts{upgradeScripts}, *targets...)
 
 	if conConstraint.Check(fromVersion) {
-
-		fmt.Println("obtaining the minimum version that satisfies constraints. set target version")
 		return
 	}
 
-	fmt.Println("list versions from remote")
+	log.Println("list versions from remote")
 	list, err := p.remoteScript.RemoteVersions(conConstraint)
 	if err != nil {
 		return err
@@ -126,7 +117,7 @@ func (p *Updater) compareVersionFromAndTo(targets *[]IUpgradeScripts, fromVersio
 
 	if len(listChecked) == 0 {
 
-		return fmt.Errorf("no version man zu condition")
+		return fmt.Errorf("no version that meet the criteria were found")
 	}
 
 	sort.Sort(semver.Collection(listChecked))
