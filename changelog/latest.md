@@ -1,7 +1,7 @@
 
-### [0.0.2](https://github.com/lopygo/updater/compare/v0.0.1...v0.0.2) (2023-08-16)
+### [0.0.3](https://github.com/lopygo/updater/compare/v0.0.2...v0.0.3) (2023-08-16)
 
 
-### Features
+### Bug Fixes
 
-* **all:** add a adapter ([f70e8e2](https://github.com/lopygo/updater/commit/f70e8e2ba298015cf990df1f5c99372f273a62ff))
+* **all:** fix some bugs ([a0dd216](https://github.com/lopygo/updater/commit/a0dd216dc1fcf89c35dd8a84977fd17d93d2d28f))
