@@ -28,20 +28,20 @@ func (p *Updater) GenerateUpgrades() (upgrades []*UpgradeArgs, err error) {
 
 		return
 	}
-	log.Println("get version of local", localVer)
+	log.Println("get local version:", localVer)
 
 	latestVer, err := p.remoteScript.RemoteLatestVersion()
 	if err != nil {
 		return
 	}
-	log.Println("get latest version from remote", latestVer)
+	log.Println("get latest version from remote:", latestVer)
 
 	if !latestVer.GreaterThan(localVer) {
 		err = fmt.Errorf("the local version is already up to date")
 		return
 	}
 
-	log.Println("set target version, from current")
+	log.Printf("preparing to upgrade from %s to %s.", localVer, latestVer)
 	upgrades = []*UpgradeArgs{}
 
 	log.Println("loop checking")
