@@ -10,7 +10,7 @@ import (
 
 type GetUpgradeInfoHandle func(to *semver.Version) (cmdOutput []byte, err error)
 
-type UpgradeHandle func(to *semver.Version) (err error)
+type UpgradeHandle func(from, to *semver.Version) (err error)
 
 func NewUpgrade(to *semver.Version, fnInfo GetUpgradeInfoHandle, fnUpgrade UpgradeHandle) (p *upgradeScriptDemo, err error) {
 
@@ -65,11 +65,11 @@ func (p *upgradeScriptDemo) UpgradeInfo() (updater.IUpgradeScriptsInfo, error) {
 	return &info, nil
 }
 
-func (p *upgradeScriptDemo) UpgradeExec() error {
+func (p *upgradeScriptDemo) UpgradeExec(from *semver.Version) error {
 
 	if p.fnUpgrade == nil {
 		return fmt.Errorf("handle can not set")
 	}
 
-	return p.fnUpgrade(p.to)
+	return p.fnUpgrade(from, p.to)
 }

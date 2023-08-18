@@ -5,7 +5,7 @@ import "github.com/Masterminds/semver/v3"
 type IUpgradeScripts interface {
 	UpgradeInfo() (IUpgradeScriptsInfo, error)
 
-	UpgradeExec() error
+	UpgradeExec(from *semver.Version) error
 }
 
 type IUpgradeScriptsInfo interface {

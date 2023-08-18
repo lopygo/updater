@@ -21,7 +21,7 @@ func NewUpdater(local ILocalScripts, remote IRemoteScripts) *Updater {
 	}
 }
 
-func (p *Updater) GenerateUpgrades() (upgrades []IUpgradeScripts, err error) {
+func (p *Updater) GenerateUpgrades() (upgrades []*UpgradeArgs, err error) {
 
 	localVer, err := p.localScript.LocalCurrentVersion()
 	if err != nil {
@@ -42,17 +42,17 @@ func (p *Updater) GenerateUpgrades() (upgrades []IUpgradeScripts, err error) {
 	}
 
 	log.Println("set target version, from current")
-	upgrades = []IUpgradeScripts{}
+	upgrades = []*UpgradeArgs{}
 
-	log.Println("loop")
+	log.Println("loop checking")
 	err = p.compareVersionFromAndTo(&upgrades, localVer, latestVer)
 
 	return
 }
 
-func (p *Updater) Exec(upgrades []IUpgradeScripts) error {
+func (p *Updater) Exec(upgrades []*UpgradeArgs) error {
 	for _, v := range upgrades {
-		err := v.UpgradeExec()
+		err := v.Script.UpgradeExec(v.From)
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,7 @@ func (p *Updater) Exec(upgrades []IUpgradeScripts) error {
 	return nil
 }
 
-func (p *Updater) compareVersionFromAndTo(targets *[]IUpgradeScripts, fromVersion, toVersion *semver.Version) (err error) {
+func (p *Updater) compareVersionFromAndTo(targets *[]*UpgradeArgs, fromVersion, toVersion *semver.Version) (err error) {
 
 	if !fromVersion.LessThan(toVersion) {
 		err = fmt.Errorf("local version[%s] not less than target[%s] ", fromVersion, toVersion)
@@ -94,7 +94,13 @@ func (p *Updater) compareVersionFromAndTo(targets *[]IUpgradeScripts, fromVersio
 
 	conConstraint, err := scriptInfo.UpgradeInfoConstraint()
 
-	*targets = append([]IUpgradeScripts{upgradeScripts}, *targets...)
+	tttt := &UpgradeArgs{
+		Script: upgradeScripts,
+		From:   fromVersion,
+	}
+	*targets = append([]*UpgradeArgs{
+		tttt,
+	}, *targets...)
 
 	if conConstraint.Check(fromVersion) {
 		return
@@ -124,9 +130,15 @@ func (p *Updater) compareVersionFromAndTo(targets *[]IUpgradeScripts, fromVersio
 
 		return fmt.Errorf("no version that meet the criteria were found")
 	}
+	tttt.From = listChecked[0]
 
 	sort.Sort(semver.Collection(listChecked))
 
 	return p.compareVersionFromAndTo(targets, fromVersion, listChecked[0])
 
+}
+
+type UpgradeArgs struct {
+	From   *semver.Version
+	Script IUpgradeScripts
 }

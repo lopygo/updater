@@ -142,9 +142,9 @@ func (p *upgradeScript) UpgradeInfo() (updater.IUpgradeScriptsInfo, error) {
 	return vv, nil
 }
 
-func (p *upgradeScript) UpgradeExec() error {
+func (p *upgradeScript) UpgradeExec(from *semver.Version) error {
 
-	fmt.Println("exec upgrade to : ", p.v)
+	fmt.Println("exec upgrade: ", from, "to", p.v)
 	return nil
 }
 
