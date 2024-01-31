@@ -1,7 +1,7 @@
 
-## [0.1.0](https://github.com/lopygo/updater/compare/v0.0.3...v0.1.0) (2023-08-18)
+### [0.1.1](https://github.com/lopygo/updater/compare/v0.1.0...v0.1.1) (2024-01-31)
 
 
-### Features
+### Bug Fixes
 
-* **all:** add arg fromversion when exec upgrade ([29194da](https://github.com/lopygo/updater/commit/29194da56a0d313c16f21cf8a9a9a3a0cc409e85))
+* **all:** add some logs ([0b88b24](https://github.com/lopygo/updater/commit/0b88b247c87aeed71e3a185db2dc99dbc7544db6))
