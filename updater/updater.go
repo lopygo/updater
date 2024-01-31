@@ -64,40 +64,49 @@ func (p *Updater) Exec(upgrades []*UpgradeArgs) error {
 
 func (p *Updater) compareVersionFromAndTo(targets *[]*UpgradeArgs, fromVersion, toVersion *semver.Version) (err error) {
 
+	log.Println("################################ compare versions ################################")
+	log.Printf("compare versions from [%s] to [%s]", fromVersion.String(), toVersion.String())
 	if !fromVersion.LessThan(toVersion) {
 		err = fmt.Errorf("local version[%s] not less than target[%s] ", fromVersion, toVersion)
 		return
 	}
 
-	log.Println("download the version from remote if not exists")
+	log.Printf("download the scripts of version[%s] from remote if not exists", toVersion.String())
 	upgradeScripts, err := p.remoteScript.RemoteGetUpgradeScripts(toVersion)
 	if err != nil {
-
 		return
 	}
 
-	log.Println("get constraint info from upgrade scripts")
+	log.Println("get scripts info")
 	scriptInfo, err := upgradeScripts.UpgradeInfo()
 	if err != nil {
 		return
 	}
 
+	log.Println("get version of scripts")
 	infoVersion, err := scriptInfo.UpgradeInfoCurrent()
 	if err != nil {
 		return
 	}
 
+	log.Println("match versions of scripts and binary")
 	if !infoVersion.Equal(toVersion) {
 		err = fmt.Errorf("the target version number for the upgrade should match the script version number")
 		return
 	}
 
+	log.Println("get constraint from this script")
 	conConstraint, err := scriptInfo.UpgradeInfoConstraint()
+	if err != nil {
+		return
+	}
 
+	log.Printf(`the constraint is "%s" of "%s"`, conConstraint.String(), toVersion.String())
 	tttt := &UpgradeArgs{
 		Script: upgradeScripts,
 		From:   fromVersion,
 	}
+
 	*targets = append([]*UpgradeArgs{
 		tttt,
 	}, *targets...)
@@ -127,9 +136,9 @@ func (p *Updater) compareVersionFromAndTo(targets *[]*UpgradeArgs, fromVersion, 
 	}
 
 	if len(listChecked) == 0 {
-
 		return fmt.Errorf("no version that meet the criteria were found")
 	}
+
 	tttt.From = listChecked[0]
 
 	sort.Sort(semver.Collection(listChecked))
