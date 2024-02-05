@@ -1,7 +1,7 @@
 
-### [0.1.1](https://github.com/lopygo/updater/compare/v0.1.0...v0.1.1) (2024-01-31)
+### [0.1.2](https://github.com/lopygo/updater/compare/v0.1.1...v0.1.2) (2024-02-05)
 
 
 ### Bug Fixes
 
-* **all:** add some logs ([0b88b24](https://github.com/lopygo/updater/commit/0b88b247c87aeed71e3a185db2dc99dbc7544db6))
+* **all:** fix a bug ([df39fa8](https://github.com/lopygo/updater/commit/df39fa80f4a61a163be73681f223975da700b5fb))
