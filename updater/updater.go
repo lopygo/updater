@@ -102,6 +102,7 @@ func (p *Updater) compareVersionFromAndTo(targets *[]*UpgradeArgs, fromVersion, 
 	}
 
 	log.Printf(`the constraint is "%s" of "%s"`, conConstraint.String(), toVersion.String())
+
 	tttt := &UpgradeArgs{
 		Script: upgradeScripts,
 		From:   fromVersion,
@@ -111,9 +112,12 @@ func (p *Updater) compareVersionFromAndTo(targets *[]*UpgradeArgs, fromVersion, 
 		tttt,
 	}, *targets...)
 
+	// this only looking for release versions
+	log.Println(`constraint check self`, conConstraint.String(), fromVersion.String())
 	if conConstraint.Check(fromVersion) {
 		return
 	}
+	log.Println(`constraint check self res`, conConstraint.Check(fromVersion))
 
 	log.Println("list versions from remote")
 	list, err := p.remoteScript.RemoteVersions(conConstraint)
@@ -139,10 +143,15 @@ func (p *Updater) compareVersionFromAndTo(targets *[]*UpgradeArgs, fromVersion, 
 		return fmt.Errorf("no version that meet the criteria were found")
 	}
 
-	tttt.From = listChecked[0]
-
 	sort.Sort(semver.Collection(listChecked))
 
+	// if it is a prerelease version
+	if fromVersion.GreaterThan(listChecked[0]) {
+		tttt.From = fromVersion
+		return nil
+	}
+
+	tttt.From = listChecked[0]
 	return p.compareVersionFromAndTo(targets, fromVersion, listChecked[0])
 
 }
